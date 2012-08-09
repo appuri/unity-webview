@@ -123,9 +123,9 @@ static void UnitySendMessage(
 - (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id<WebPolicyDecisionListener>)listener
 {
 	NSString *url = [[request URL] absoluteString];
+    NSLog(@"decidePolicyForNavigationAction: %s", url);
+    UnitySendMessage([gameObject UTF8String], "CallFromJS", [url UTF8String]);
 	if ([url hasPrefix:@"unity:"]) {
-		UnitySendMessage([gameObject UTF8String],
-			"CallFromJS", [[url substringFromIndex:6] UTF8String]);
 		[listener ignore];
 	} else {
 		[listener use];

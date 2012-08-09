@@ -84,7 +84,22 @@ public class WebViewPlugin
 				Gravity.NO_GRAVITY));
 
 			mWebView.setWebChromeClient(new WebChromeClient());
-			mWebView.setWebViewClient(new WebViewClient());
+            mWebView.setWebViewClient(new WebViewClient(){
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView  view, String  url){
+                    Log.v("shouldOverrideUrlLoading", url);
+                    UnityPlayer.UnitySendMessage(gameObject, "CallFromJS", url);
+                    return super.shouldOverrideUrlLoading(view, url);
+                }
+                // here you execute an action when the URL you want is about to load
+                @Override
+                public void onLoadResource(WebView  view, String  url){
+                    Log.v("onLoadResource", url);
+                    UnityPlayer.UnitySendMessage(gameObject, "CallFromJS", url);
+                    //view.loadUrl(url);
+                    super.onLoadResource(view, url);
+                }
+            });
 			mWebView.addJavascriptInterface(
 				new WebViewPluginInterface(gameObject), "Unity");
 

@@ -32,6 +32,7 @@ public class UnitySendMessageDispatcher
 {
 	public static void Dispatch(string name, string method, string message)
 	{
+		Debug.Log (string.Format("Dispatch: {0}, {1}, {2}", name, method, message));
 		GameObject obj = GameObject.Find(name);
 		if (obj != null)
 			obj.SendMessage(method, message);
@@ -42,9 +43,10 @@ public class UnitySendMessageDispatcher
 public class WebViewObject : MonoBehaviour
 {
 	Callback callback;
+	bool visibility;
+	string url = string.Empty;
 #if UNITY_EDITOR || UNITY_STANDALONE_OSX
 	IntPtr webView;
-	bool visibility;
 	Rect rect;
 	Texture2D texture;
 	string inputString;
@@ -182,6 +184,16 @@ public class WebViewObject : MonoBehaviour
 #endif
 	}
 
+	public bool Visible {
+		get {
+			return visibility;	
+		}
+		set {
+			visibility = value;
+			SetVisibility(visibility);
+		}
+	}
+	
 	public void LoadURL(string url)
 	{
 #if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_IPHONE
@@ -195,6 +207,16 @@ public class WebViewObject : MonoBehaviour
 #endif
 	}
 
+	public string URL {
+		get {
+			return url;
+		}
+		set {
+			url = value;
+			LoadURL(url);
+		}
+	}
+	
 	public void EvaluateJS(string js)
 	{
 #if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_IPHONE
