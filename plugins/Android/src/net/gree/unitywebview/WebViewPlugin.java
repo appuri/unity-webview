@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2011 Keijiro Takahashi
  * Copyright (C) 2012 GREE, Inc.
+ * Copyright (C) 2012 Appuri, Inc.
  * 
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -36,142 +37,116 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
-class WebViewPluginInterface
-{
-	private String mGameObject;
-
-	public WebViewPluginInterface(final String gameObject)
-	{
-		mGameObject = gameObject;
-	}
-
-	public void call(String message)
-	{
-		UnityPlayer.UnitySendMessage(mGameObject, "CallFromJS", message);
-	}
+class WebViewPluginInterface {
+    private String mGameObject;
+    
+    public WebViewPluginInterface(final String gameObject) {
+        mGameObject = gameObject;
+    }
+    
+    public void call(String message) {
+        UnityPlayer.UnitySendMessage(mGameObject, "CallFromJS", message);
+    }
 }
 
-public class WebViewPlugin
-{
-	private static FrameLayout layout = null;
-	private WebView mWebView;
-	private long mDownTime;
-
-	public WebViewPlugin()
-	{
-	}
-
-	public void Init(final String gameObject)
-	{
-		final Activity a = UnityPlayer.currentActivity;
-		a.runOnUiThread(new Runnable() {public void run() {
-
-			mWebView = new WebView(a);
-			mWebView.setVisibility(View.GONE);
-			mWebView.setFocusable(true);
-			mWebView.setFocusableInTouchMode(true);
-
-			if (layout == null) {
-				layout = new FrameLayout(a);
-				a.addContentView(layout, new LayoutParams(
-					LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-				layout.setFocusable(true);
-				layout.setFocusableInTouchMode(true);
-			}
-
-			layout.addView(mWebView, new FrameLayout.LayoutParams(
-				LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT,
-				Gravity.NO_GRAVITY));
-
-			mWebView.setWebChromeClient(new WebChromeClient());
-            mWebView.setWebViewClient(new WebViewClient(){
-                @Override
-                public boolean shouldOverrideUrlLoading(WebView  view, String  url){
-                    Log.v("shouldOverrideUrlLoading", url);
-                    UnityPlayer.UnitySendMessage(gameObject, "CallFromJS", url);
-                    return super.shouldOverrideUrlLoading(view, url);
-                }
-                // here you execute an action when the URL you want is about to load
-                @Override
-                public void onLoadResource(WebView  view, String  url){
-                    Log.v("onLoadResource", url);
-                    UnityPlayer.UnitySendMessage(gameObject, "CallFromJS", url);
-                    //view.loadUrl(url);
-                    super.onLoadResource(view, url);
-                }
-            });
-			mWebView.addJavascriptInterface(
-				new WebViewPluginInterface(gameObject), "Unity");
-
-			WebSettings webSettings = mWebView.getSettings();
-			webSettings.setSupportZoom(false);
-			webSettings.setJavaScriptEnabled(true);
-			webSettings.setPluginsEnabled(true);
-
-		}});
-	}
-
-	public void Destroy()
-	{
-		Activity a = UnityPlayer.currentActivity;
-		a.runOnUiThread(new Runnable() {public void run() {
-
-			if (mWebView != null) {
-				layout.removeView(mWebView);
-				mWebView = null;
-			}
-
-		}});
-	}
-
-	public void LoadURL(final String url)
-	{
-		final Activity a = UnityPlayer.currentActivity;
-		a.runOnUiThread(new Runnable() {public void run() {
-
-			mWebView.loadUrl(url);
-
-		}});
-	}
-
-	public void EvaluateJS(final String js)
-	{
-		final Activity a = UnityPlayer.currentActivity;
-		a.runOnUiThread(new Runnable() {public void run() {
-
-			mWebView.loadUrl("javascript:" + js);
-
-		}});
-	}
-
-	public void SetMargins(int left, int top, int right, int bottom)
-	{
-		final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-			LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT,
-				Gravity.NO_GRAVITY);
-		params.setMargins(left, top, right, bottom);
-
-		Activity a = UnityPlayer.currentActivity;
-		a.runOnUiThread(new Runnable() {public void run() {
-
-			mWebView.setLayoutParams(params);
-
-		}});
-	}
-
-	public void SetVisibility(final boolean visibility)
-	{
-		Activity a = UnityPlayer.currentActivity;
-		a.runOnUiThread(new Runnable() {public void run() {
-
-			if (visibility) {
-				mWebView.setVisibility(View.VISIBLE);
-				layout.requestFocus();
-				mWebView.requestFocus();
-			} else {
-				mWebView.setVisibility(View.GONE);
-			}
-
-		}});
-	}
+public class WebViewPlugin {
+    private static FrameLayout layout = null;
+    private WebView mWebView;
+    private long mDownTime;
+    
+    public WebViewPlugin() {
+    }
+    
+    public void Init(final String gameObject) {
+        final Activity a = UnityPlayer.currentActivity;
+        a.runOnUiThread(new Runnable() { public void run() {
+            mWebView = new WebView(a);
+            mWebView.setVisibility(View.GONE);
+            mWebView.setFocusable(true);
+            mWebView.setFocusableInTouchMode(true);
+            
+            if (layout == null) {
+                layout = new FrameLayout(a);
+                a.addContentView(layout, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+                layout.setFocusable(true);
+                layout.setFocusableInTouchMode(true);
+            }
+            
+            layout.addView(mWebView, new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT,
+                                                                  Gravity.NO_GRAVITY));
+            
+            mWebView.setWebChromeClient(new WebChromeClient() {
+                });
+            mWebView.setWebViewClient(new WebViewClient() {
+                    @Override
+                        public boolean shouldOverrideUrlLoading(WebView  view, String  url){
+                        Log.v("shouldOverrideUrlLoading", url);
+                        UnityPlayer.UnitySendMessage(gameObject, "CallFromJS", url);
+                        return super.shouldOverrideUrlLoading(view, url);
+                    }
+                    // here you execute an action when the URL you want is about to load
+                    @Override
+                        public void onLoadResource(WebView  view, String  url){
+                        Log.v("onLoadResource", url);
+                        UnityPlayer.UnitySendMessage(gameObject, "CallFromJS", url);
+                        //view.loadUrl(url);
+                        super.onLoadResource(view, url);
+                    }
+                });
+            mWebView.addJavascriptInterface(new WebViewPluginInterface(gameObject), "Unity");
+            
+            WebSettings webSettings = mWebView.getSettings();
+            webSettings.setSupportZoom(false);
+            webSettings.setJavaScriptEnabled(true);
+            webSettings.setPluginsEnabled(true);
+        }});
+    }
+    
+    public void Destroy() {
+        Activity a = UnityPlayer.currentActivity;
+        a.runOnUiThread(new Runnable() { public void run() {
+            if (mWebView != null) {
+                layout.removeView(mWebView);
+                mWebView = null;
+            }
+        }});
+    }
+    
+    public void LoadURL(final String url) {
+        final Activity a = UnityPlayer.currentActivity;
+        a.runOnUiThread(new Runnable() { public void run() {
+            mWebView.loadUrl(url);
+        }});
+    }
+    
+    public void EvaluateJS(final String js) {
+        final Activity a = UnityPlayer.currentActivity;
+        a.runOnUiThread(new Runnable() { public void run() {
+            mWebView.loadUrl("javascript:" + js);
+        }});
+    }
+    
+    public void SetMargins(int left, int top, int right, int bottom) {
+        final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT,
+                                                                             Gravity.NO_GRAVITY);
+        params.setMargins(left, top, right, bottom);
+        
+        Activity a = UnityPlayer.currentActivity;
+        a.runOnUiThread(new Runnable() { public void run() {
+            mWebView.setLayoutParams(params);
+        }});
+    }
+    
+    public void SetVisibility(final boolean visibility) {
+        Activity a = UnityPlayer.currentActivity;
+        a.runOnUiThread(new Runnable() { public void run() {
+            if (visibility) {
+                mWebView.setVisibility(View.VISIBLE);
+                layout.requestFocus();
+                mWebView.requestFocus();
+            } else {
+                mWebView.setVisibility(View.GONE);
+            }
+        }});
+    }
 }
